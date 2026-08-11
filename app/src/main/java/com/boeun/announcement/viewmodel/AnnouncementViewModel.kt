@@ -28,15 +28,31 @@ class AnnouncementViewModel(
     private val _errorMessage = MutableLiveData<String?>()
     val errorMessage: LiveData<String?> = _errorMessage
     
+    // 현재 페이지 번호 관리
+    private val _currentPage = MutableLiveData<Int>(1)
+    val currentPage: LiveData<Int> = _currentPage
+    
+    // 보여줄 페이지 번호 목록
+    private val _pageList = MutableLiveData<List<Int>>()
+    val pageList: LiveData<List<Int>> = _pageList
+    
     init {
-        loadAnnouncements()
+        loadAnnouncements(1)
     }
     
+    private var loadingJob: kotlinx.coroutines.Job? = null
+
     /**
      * 공고 목록을 불러옵니다
      */
-    fun loadAnnouncements(page: Int = 1) {
-        viewModelScope.launch {
+    fun loadAnnouncements(page: Int) {
+        _currentPage.value = page
+        updatePageList(page) // 페이지 목록 갱신
+        
+        // 이미 로딩 중인 경우 이전 작업 취소
+        loadingJob?.cancel()
+        
+        loadingJob = viewModelScope.launch {
             _isLoading.value = true
             _errorMessage.value = null
             
@@ -55,9 +71,36 @@ class AnnouncementViewModel(
     }
     
     /**
+     * 다음 페이지로 이동
+     */
+    fun nextPage() {
+        val next = (_currentPage.value ?: 1) + 1
+        loadAnnouncements(next)
+    }
+    
+    /**
+     * 이전 페이지로 이동
+     */
+    fun prevPage() {
+        val current = _currentPage.value ?: 1
+        if (current > 1) {
+            loadAnnouncements(current - 1)
+        }
+    }
+    
+    /**
+     * 보여줄 페이지 번호 목록을 계산합니다 (예: 현재 3 -> 1, 2, 3, 4, 5)
+     */
+    private fun updatePageList(current: Int) {
+        val start = (current - 2).coerceAtLeast(1)
+        val end = start + 4 // 5개씩 보여줌
+        _pageList.value = (start..end).toList()
+    }
+    
+    /**
      * 새로고침
      */
     fun refresh() {
-        loadAnnouncements()
+        loadAnnouncements(_currentPage.value ?: 1)
     }
 }

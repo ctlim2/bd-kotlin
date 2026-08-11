@@ -50,7 +50,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             tools:text="2026년 보은군 청년 일자리 지원사업 공고" />
         
-        <!-- 날짜 -->
+        <!-- 날짜 (작성일) -->
         <TextView
             android:id="@+id/textDate"
             android:layout_width="0dp"
@@ -61,9 +61,24 @@
             android:layout_marginTop="8dp"
             app:layout_constraintTop_toBottomOf="@id/textTitle"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/imageArrow"
             tools:text="게시일: 2026-01-22" />
-        
+
+        <!-- 마감일 추가 -->
+        <TextView
+            android:id="@+id/textDeadline"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="마감일: 2026-02-22"
+            android:textSize="14sp"
+            android:textColor="#E91E63"
+            android:textStyle="bold"
+            android:layout_marginTop="4dp"
+            app:layout_constraintTop_toBottomOf="@id/textDate"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/imageArrow"
+            tools:text="마감일: 2026-02-22" />
+
         <!-- 화살표 아이콘 (클릭 힌트) -->
         <ImageView
             android:id="@+id/imageArrow"

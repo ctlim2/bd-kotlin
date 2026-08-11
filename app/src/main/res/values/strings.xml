@@ -6,4 +6,6 @@
     <string name="new_announcement">새 공고</string>
     <string name="loading">로딩 중...</string>
     <string name="refresh">새로고침</string>
+    <string name="page_prev">&lt;</string>
+    <string name="page_next">&gt;</string>
 </resources>

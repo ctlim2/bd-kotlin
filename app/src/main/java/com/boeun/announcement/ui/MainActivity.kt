@@ -43,6 +43,7 @@ class MainActivity : AppCompatActivity() {
         
         setupRecyclerView()
         setupSwipeRefresh()
+        setupClickListeners() // 버튼 클릭 리스너 설정 추가
         observeViewModel()
         
         // 알림 권한 확인 및 요청 (Android 13 이상)
@@ -75,6 +76,26 @@ class MainActivity : AppCompatActivity() {
     }
     
     /**
+     * 버튼 클릭 리스너 설정
+     */
+    private fun setupClickListeners() {
+        binding.fabRefresh.setOnClickListener {
+            viewModel.refresh()
+            android.widget.Toast.makeText(this, "공고를 새로 불러옵니다", android.widget.Toast.LENGTH_SHORT).show()
+        }
+        
+        // 이전 페이지 버튼
+        binding.btnPrev.setOnClickListener {
+            viewModel.prevPage()
+        }
+        
+        // 다음 페이지 버튼
+        binding.btnNext.setOnClickListener {
+            viewModel.nextPage()
+        }
+    }
+    
+    /**
      * ViewModel 관찰
      */
     private fun observeViewModel() {
@@ -93,6 +114,52 @@ class MainActivity : AppCompatActivity() {
             errorMessage?.let {
                 Toast.makeText(this, it, Toast.LENGTH_LONG).show()
             }
+        }
+        
+        // 현재 페이지 번호 관찰
+        viewModel.currentPage.observe(this) { page ->
+            // 1페이지에서는 이전 버튼 비활성화
+            binding.btnPrev.isEnabled = page > 1
+        }
+        
+        // 페이지 번호 목록 관찰 및 버튼 생성
+        viewModel.pageList.observe(this) { pages ->
+            renderPageButtons(pages, viewModel.currentPage.value ?: 1)
+        }
+    }
+    
+    /**
+     * 페이지 번호 버튼들을 동적으로 생성하여 레이아웃에 추가합니다.
+     */
+    private fun renderPageButtons(pages: List<Int>, currentPage: Int) {
+        binding.layoutPageNumbers.removeAllViews()
+        
+        for (page in pages) {
+            val button = android.widget.Button(this, null, com.google.android.material.R.attr.materialButtonOutlinedStyle).apply {
+                layoutParams = android.widget.LinearLayout.LayoutParams(
+                    android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
+                    android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+                ).apply {
+                    setMargins(4, 0, 4, 0)
+                }
+                text = page.toString()
+                minWidth = 0
+                minimumWidth = 0
+                setPadding(20, 0, 20, 0)
+                
+                // 현재 페이지 강조
+                if (page == currentPage) {
+                    setBackgroundColor(ContextCompat.getColor(context, com.boeun.announcement.R.color.purple_500))
+                    setTextColor(ContextCompat.getColor(context, android.R.color.white))
+                } else {
+                    setTextColor(ContextCompat.getColor(context, com.boeun.announcement.R.color.purple_500))
+                }
+                
+                setOnClickListener {
+                    viewModel.loadAnnouncements(page)
+                }
+            }
+            binding.layoutPageNumbers.addView(button)
         }
     }
     
