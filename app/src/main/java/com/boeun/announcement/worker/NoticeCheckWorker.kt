@@ -22,6 +22,12 @@ class NoticeCheckWorker(
     private val notificationHelper = NotificationHelper(applicationContext)
     
     override suspend fun doWork(): Result {
+        // 알림 설정이 꺼져 있으면 작업을 건너뜀
+        if (!preferenceHelper.isNotificationEnabled()) {
+            Log.d(TAG, "알림 설정이 비활성화되어 작업을 중단합니다.")
+            return Result.success()
+        }
+
         Log.d(TAG, "공고 체크 시작...")
         
         return try {

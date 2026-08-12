@@ -39,11 +39,41 @@ class PreferenceHelper(context: Context) {
     fun getLastCheckTime(): Long {
         return prefs.getLong(KEY_LAST_CHECK_TIME, 0L)
     }
-    
+
+    /**
+     * 알림 활성화 여부를 저장합니다
+     */
+    fun setNotificationEnabled(enabled: Boolean) {
+        prefs.edit().putBoolean(KEY_NOTI_ENABLED, enabled).apply()
+    }
+
+    /**
+     * 알림 활성화 여부를 가져옵니다 (기본값: true)
+     */
+    fun isNotificationEnabled(): Boolean {
+        return prefs.getBoolean(KEY_NOTI_ENABLED, true)
+    }
+
+    /**
+     * 체크 주기를 저장합니다 (단위: 분)
+     */
+    fun setCheckInterval(minutes: Int) {
+        prefs.edit().putInt(KEY_CHECK_INTERVAL, minutes).apply()
+    }
+
+    /**
+     * 체크 주기를 가져옵니다 (기본값: 15분)
+     */
+    fun getCheckInterval(): Int {
+        return prefs.getInt(KEY_CHECK_INTERVAL, 15)
+    }
+
     companion object {
         private const val PREF_NAME = "boeun_announcement_prefs"
         private const val KEY_LAST_CHECKED_ID = "last_checked_id"
         private const val KEY_LAST_CHECK_TIME = "last_check_time"
+        private const val KEY_NOTI_ENABLED = "noti_enabled"
+        private const val KEY_CHECK_INTERVAL = "check_interval"
         
         @Volatile
         private var instance: PreferenceHelper? = null

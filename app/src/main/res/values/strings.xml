@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">보은군 공고 알리미</string>
-    <string name="notification_channel_name">보은군 공고 알림</string>
+    <string name="app_name">보은 알리미</string>
+    <string name="notification_channel_name">보은 알림</string>
     <string name="notification_channel_description">새로운 보은군 공고가 등록되면 알림을 받습니다</string>
     <string name="new_announcement">새 공고</string>
     <string name="loading">로딩 중...</string>

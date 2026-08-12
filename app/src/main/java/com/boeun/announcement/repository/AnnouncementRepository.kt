@@ -17,11 +17,11 @@ class AnnouncementRepository {
     /**
      * 공고 목록을 HTML 파싱하여 가져옵니다
      */
-    suspend fun getAnnouncements(page: Int = 1): Result<List<Announcement>> {
+    suspend fun getAnnouncements(page: Int = 1, key: Int = 142, bbsNo: Int = 68): Result<List<Announcement>> {
         return withContext(Dispatchers.IO) {
             try {
                 // 파라미터 구성
-                val url = "$baseUrl?key=142&bbsNo=68&integrDeptCodepageIndex=&pageIndex=$page"
+                val url = "$baseUrl?key=$key&bbsNo=$bbsNo&integrDeptCodepageIndex=&pageIndex=$page"
                 
                 // HTML 문서 가져오기
                 val doc: Document = Jsoup.connect(url)
@@ -89,6 +89,7 @@ class AnnouncementRepository {
                             deadlineDate = deadline,
                             url = finalUrl,
                             category = category,
+                            bbsNo = bbsNo,
                         )
                     )
                 }

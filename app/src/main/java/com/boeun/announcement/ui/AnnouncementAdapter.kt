@@ -48,7 +48,8 @@ class AnnouncementAdapter : ListAdapter<Announcement, AnnouncementAdapter.Announ
                 textDate.text = "게시일: ${announcement.publishDate}"
                 
                 // 마감일 설정 및 마감 여부 확인
-                if (!announcement.deadlineDate.isNullOrEmpty()) {
+                // 고시/공고(bbsNo=66)의 경우 마감일을 표시하지 않음
+                if (!announcement.deadlineDate.isNullOrEmpty() && announcement.bbsNo != 66) {
                     textDeadline.text = "마감일: ${announcement.deadlineDate}"
                     textDeadline.visibility = android.view.View.VISIBLE
                     

@@ -44,6 +44,7 @@ class MainActivity : AppCompatActivity() {
         setupRecyclerView()
         setupSwipeRefresh()
         setupClickListeners() // 버튼 클릭 리스너 설정 추가
+        setupTabSelection()   // 탭 선택 설정 추가
         observeViewModel()
         
         // 알림 권한 확인 및 요청 (Android 13 이상)
@@ -93,6 +94,100 @@ class MainActivity : AppCompatActivity() {
         binding.btnNext.setOnClickListener {
             viewModel.nextPage()
         }
+        
+        // 설정 버튼 클릭
+        binding.btnSettings.setOnClickListener {
+            showSettingsDialog()
+        }
+    }
+    
+    /**
+     * 세련된 설정 다이얼로그 표시
+     */
+    private fun showSettingsDialog() {
+        val preferenceHelper = com.boeun.announcement.utils.PreferenceHelper.getInstance(this)
+        val intervals = arrayOf("15분", "30분", "1시간", "3시간", "하루")
+        val intervalValues = arrayOf(15, 30, 60, 180, 1440)
+        
+        val currentIntervalIndex = intervalValues.indexOf(preferenceHelper.getCheckInterval()).let { if (it == -1) 0 else it }
+        
+        val container = android.widget.LinearLayout(this).apply {
+            orientation = android.widget.LinearLayout.VERTICAL
+            setPadding(60, 40, 60, 40)
+        }
+
+        // 알림 설정 항목
+        val switchNoti = com.google.android.material.switchmaterial.SwitchMaterial(this).apply {
+            text = "새 공고 푸시 알림"
+            isChecked = preferenceHelper.isNotificationEnabled()
+            textSize = 16f
+            setPadding(0, 20, 0, 40)
+        }
+        container.addView(switchNoti)
+
+        // 주기 설정 항목 (텍스트 클릭형)
+        val intervalTitle = android.widget.TextView(this).apply {
+            text = "체크 주기 설정"
+            textSize = 16f
+            setTextColor(android.graphics.Color.BLACK)
+        }
+        val intervalValueText = android.widget.TextView(this).apply {
+            text = intervals[currentIntervalIndex]
+            textSize = 14f
+            setTextColor(ContextCompat.getColor(context, com.boeun.announcement.R.color.purple_500))
+            setPadding(0, 10, 0, 20)
+        }
+        
+        val intervalLayout = android.widget.LinearLayout(this).apply {
+            orientation = android.widget.LinearLayout.VERTICAL
+            isClickable = true
+            isFocusable = true
+            setOnClickListener {
+                // 현재 설정된 주기를 다시 가져와서 선택 상태로 만듦
+                val latestInterval = preferenceHelper.getCheckInterval()
+                val latestIndex = intervalValues.indexOf(latestInterval).let { if (it == -1) 0 else it }
+                
+                com.google.android.material.dialog.MaterialAlertDialogBuilder(this@MainActivity)
+                    .setTitle("주기 선택")
+                    .setSingleChoiceItems(intervals, latestIndex) { d, which ->
+                        preferenceHelper.setCheckInterval(intervalValues[which])
+                        intervalValueText.text = intervals[which]
+                        WorkManagerHelper.scheduleNoticeCheck(this@MainActivity)
+                        d.dismiss()
+                    }
+                    .show()
+            }
+            addView(intervalTitle)
+            addView(intervalValueText)
+        }
+        container.addView(intervalLayout)
+
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+            .setTitle("환경 설정")
+            .setView(container)
+            .setPositiveButton("확인") { _, _ ->
+                preferenceHelper.setNotificationEnabled(switchNoti.isChecked)
+                WorkManagerHelper.scheduleNoticeCheck(this)
+                Toast.makeText(this, "설정이 저장되었습니다", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton("취소", null)
+            .show()
+    }
+    
+    /**
+     * 탭 선택 설정 (일반공고 vs 고시/공고)
+     */
+    private fun setupTabSelection() {
+        binding.tabCategory.addOnTabSelectedListener(object : com.google.android.material.tabs.TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: com.google.android.material.tabs.TabLayout.Tab?) {
+                when (tab?.position) {
+                    0 -> viewModel.setCategory(142, 68) // 채용공고
+                    1 -> viewModel.setCategory(194, 66) // 고시/공고
+                }
+            }
+            override fun onTabUnselected(tab: com.google.android.material.tabs.TabLayout.Tab?) {}
+            override fun onTabReselected(tab: com.google.android.material.tabs.TabLayout.Tab?) {}
+        })
     }
     
     /**

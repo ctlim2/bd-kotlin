@@ -14,28 +14,29 @@ import java.util.concurrent.TimeUnit
 object WorkManagerHelper {
     
     /**
-     * 공고 체크 작업을 예약합니다
-     * 15분마다 실행되며, 앱이 종료되어도 계속 동작합니다
+     * 공고 체크 작업을 예약합니다. 설정된 주기에 따라 실행됩니다.
      */
     fun scheduleNoticeCheck(context: Context) {
+        val preferenceHelper = com.boeun.announcement.utils.PreferenceHelper.getInstance(context)
+        val intervalMinutes = preferenceHelper.getCheckInterval().toLong()
+
         // 제약 조건 설정: 네트워크 연결이 필요함
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
             .build()
         
-        // 주기적 작업 요청 생성 (15분마다)
+        // 주기적 작업 요청 생성
         val noticeCheckRequest = PeriodicWorkRequestBuilder<NoticeCheckWorker>(
-            15, TimeUnit.MINUTES // 주기: 15분
+            intervalMinutes, TimeUnit.MINUTES
         )
             .setConstraints(constraints)
             .addTag(NoticeCheckWorker.WORK_NAME)
             .build()
         
-        // 작업 예약
-        // ExistingPeriodicWorkPolicy.KEEP: 이미 예약된 작업이 있으면 유지
+        // 작업 예약 (기존 작업이 있으면 교체하여 새로운 주기 적용)
         WorkManager.getInstance(context).enqueueUniquePeriodicWork(
             NoticeCheckWorker.WORK_NAME,
-            ExistingPeriodicWorkPolicy.KEEP,
+            ExistingPeriodicWorkPolicy.UPDATE, // 주기가 바뀔 수 있으므로 UPDATE 사용
             noticeCheckRequest
         )
     }

@@ -36,6 +36,10 @@ class AnnouncementViewModel(
     private val _pageList = MutableLiveData<List<Int>>()
     val pageList: LiveData<List<Int>> = _pageList
     
+    // 현재 선택된 게시판 타입 (key, bbsNo)
+    private var currentKey = 142
+    private var currentBbsNo = 68
+    
     init {
         loadAnnouncements(1)
     }
@@ -56,7 +60,7 @@ class AnnouncementViewModel(
             _isLoading.value = true
             _errorMessage.value = null
             
-            val result = repository.getAnnouncements(page)
+            val result = repository.getAnnouncements(page, currentKey, currentBbsNo)
             result.fold(
                 onSuccess = { announcements ->
                     _announcements.value = announcements
@@ -68,6 +72,15 @@ class AnnouncementViewModel(
             
             _isLoading.value = false
         }
+    }
+    
+    /**
+     * 게시판 카테고리 변경
+     */
+    fun setCategory(key: Int, bbsNo: Int) {
+        currentKey = key
+        currentBbsNo = bbsNo
+        loadAnnouncements(1) // 첫 페이지부터 로드
     }
     
     /**

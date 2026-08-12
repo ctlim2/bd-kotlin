@@ -12,5 +12,6 @@ data class Announcement(
     val deadlineDate: String? = null,
     val url: String,
     val category: String? = null,
+    val bbsNo: Int = 68,
     val isNew: Boolean = false
 )
